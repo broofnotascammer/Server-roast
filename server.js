@@ -2,31 +2,30 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { pipeline } from '@xenova/transformers';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// CORS configuration
+// Fix __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// CORS (optional, safe to keep)
 app.use(cors({
-    origin: [
-        'https://broofnotascammer.github.io',
-        'http://localhost:8000',
-        'http://127.0.0.1:5500',
-        'http://localhost:3000'
-    ],
+    origin: '*',
     credentials: true
 }));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Configure multer for file uploads
+// Multer for audio uploads
 const storage = multer.memoryStorage();
 const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 10 * 1024 * 1024,
-    },
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('audio/') || file.mimetype === 'application/octet-stream') {
             cb(null, true);
@@ -36,43 +35,39 @@ const upload = multer({
     }
 });
 
-// Error handling middleware (upload-level)
+// Upload error handler
 app.use((error, req, res, next) => {
     if (error instanceof multer.MulterError) {
         if (error.code === 'LIMIT_FILE_SIZE') {
-            return res.status(400).json({ error: 'File too large. Maximum size is 10MB.' });
+            return res.status(400).json({ error: 'File too large. Max 10MB.' });
         }
     }
     res.status(500).json({ error: error.message });
 });
 
-// Initialize Whisper model
+// ================== Whisper Model ==================
 let whisperPipeline;
 let modelLoading = false;
 let modelLoaded = false;
 
 async function initializeModel() {
     if (modelLoading) return;
-    
     modelLoading = true;
     console.log('🚀 Loading Whisper model...');
-    
+
     try {
-        whisperPipeline = await pipeline(
-            'automatic-speech-recognition',
-            'Xenova/whisper-small'
-        );
+        whisperPipeline = await pipeline('automatic-speech-recognition', 'Xenova/whisper-small');
         modelLoaded = true;
         console.log('✅ Whisper model loaded successfully!');
-    } catch (error) {
-        console.error('❌ Error loading model:', error);
+    } catch (err) {
+        console.error('❌ Error loading model:', err);
         modelLoaded = false;
     } finally {
         modelLoading = false;
     }
 }
 
-// Roast generation function
+// ================== Roast Generator ==================
 function generateRoast(topic) {
     const roastTemplates = {
         fashion: [
@@ -105,18 +100,18 @@ function generateRoast(topic) {
     let category = 'default';
     const topicLower = topic.toLowerCase();
 
-    if (topicLower.includes('fashion') || topicLower.includes('cloth') || 
+    if (topicLower.includes('fashion') || topicLower.includes('cloth') ||
         topicLower.includes('dress') || topicLower.includes('style') ||
         topicLower.includes('outfit')) {
         category = 'fashion';
-    } else if (topicLower.includes('food') || topicLower.includes('pizza') || 
+    } else if (topicLower.includes('food') || topicLower.includes('pizza') ||
                topicLower.includes('eat') || topicLower.includes('dish') ||
                topicLower.includes('pineapple')) {
         category = 'food';
-    } else if (topicLower.includes('tech') || topicLower.includes('code') || 
+    } else if (topicLower.includes('tech') || topicLower.includes('code') ||
                topicLower.includes('computer') || topicLower.includes('program')) {
         category = 'tech';
-    } else if (topicLower.includes('sing') || topicLower.includes('talent') || 
+    } else if (topicLower.includes('sing') || topicLower.includes('talent') ||
                topicLower.includes('skill') || topicLower.includes('voice')) {
         category = 'talent';
     }
@@ -126,16 +121,14 @@ function generateRoast(topic) {
 
     return {
         roast: category === 'default' ? `"${topic}" ${randomRoast}` : randomRoast,
-        category: category
+        category
     };
 }
 
 // ================== API Routes ==================
-
-// Health check endpoint
 app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'OK', 
+    res.json({
+        status: 'OK',
         model_loaded: modelLoaded,
         model_loading: modelLoading,
         timestamp: new Date().toISOString(),
@@ -143,131 +136,64 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Text roasting endpoint
-app.post('/api/roast/text', async (req, res) => {
+app.post('/api/roast/text', (req, res) => {
     try {
         const { text } = req.body;
-        
-        if (!text) {
-            return res.status(400).json({ error: 'Text is required' });
-        }
+        if (!text) return res.status(400).json({ error: 'Text is required' });
 
         const roastData = generateRoast(text);
-        res.json({
-            transcript: text,
-            roast: roastData.roast,
-            category: roastData.category,
-            success: true
-        });
-    } catch (error) {
-        console.error('Error processing text:', error);
-        res.status(500).json({ error: 'Internal server error', success: false });
+        res.json({ transcript: text, ...roastData, success: true });
+    } catch (err) {
+        console.error('Error in text roast:', err);
+        res.status(500).json({ error: 'Internal error', success: false });
     }
 });
 
-// Audio roasting endpoint
 app.post('/api/roast/audio', upload.single('audio'), async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'Audio file is required', success: false });
-        }
+        if (!req.file) return res.status(400).json({ error: 'Audio file required', success: false });
+        if (!modelLoaded) return res.status(503).json({ error: 'Model still loading', success: false });
 
-        if (!modelLoaded) {
-            return res.status(503).json({ 
-                error: 'Model not loaded yet. Please try again in a moment.', 
-                success: false 
-            });
-        }
+        console.log('🎤 Processing audio...');
+        const { text } = await whisperPipeline(req.file.buffer, { language: 'english', task: 'transcribe' });
 
-        console.log('🎤 Processing audio file...');
-
-        // Transcribe audio using Whisper
-        const { text } = await whisperPipeline(req.file.buffer, {
-            language: 'english',
-            task: 'transcribe'
-        });
-
-        console.log('📝 Transcription:', text);
-        
         if (!text || text.trim().length === 0) {
-            return res.status(400).json({ 
-                error: 'Could not transcribe audio. Please try again with clearer audio.', 
-                success: false 
-            });
+            return res.status(400).json({ error: 'Could not transcribe audio', success: false });
         }
 
         const roastData = generateRoast(text);
-        res.json({
-            transcript: text,
-            roast: roastData.roast,
-            category: roastData.category,
-            success: true
-        });
-    } catch (error) {
-        console.error('Error processing audio:', error);
-        res.status(500).json({ 
-            error: 'Error processing audio: ' + error.message, 
-            success: false 
-        });
+        res.json({ transcript: text, ...roastData, success: true });
+    } catch (err) {
+        console.error('Error in audio roast:', err);
+        res.status(500).json({ error: 'Audio processing failed: ' + err.message, success: false });
     }
 });
 
-// Root endpoint
+// ================== Serve Frontend ==================
+app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
-    res.json({
-        message: 'AI Roast Master API',
-        version: '1.0.0',
-        endpoints: {
-            health: '/api/health',
-            textRoast: 'POST /api/roast/text',
-            audioRoast: 'POST /api/roast/audio'
-        },
-        status: 'operational'
-    });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-    res.status(404).json({ error: 'Endpoint not found', success: false });
-});
-
-// Global error handler
-app.use((error, req, res, next) => {
-    console.error('Unhandled error:', error);
-    res.status(500).json({ error: 'Internal server error', success: false });
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // ================== Start Server ==================
 async function startServer() {
-    try {
-        // Initialize model in background
-        initializeModel().catch(console.error);
-        
-        app.listen(PORT, () => {
-            console.log(`🔥 AI Roast Master API running on port ${PORT}`);
-            console.log(`📍 Local: http://localhost:${PORT}`);
-            console.log(`📊 Health: http://localhost:${PORT}/api/health`);
-            console.log('⏳ Loading Whisper model... (this may take a few minutes)');
-        });
-    } catch (error) {
-        console.error('Failed to start server:', error);
-        process.exit(1);
-    }
+    initializeModel().catch(console.error);
+
+    app.listen(PORT, () => {
+        console.log(`🔥 AI Roast Master running at http://localhost:${PORT}`);
+        console.log(`📊 Health check at http://localhost:${PORT}/api/health`);
+    });
 }
 
-// Handle graceful shutdown
 process.on('SIGINT', () => {
-    console.log('\n🛑 Shutting down server gracefully...');
+    console.log('🛑 Server shutting down...');
     process.exit(0);
 });
-
 process.on('SIGTERM', () => {
-    console.log('\n🛑 Received SIGTERM. Shutting down...');
+    console.log('🛑 SIGTERM received. Exiting...');
     process.exit(0);
 });
 
-// Start the server
 startServer();
 
 export default app;
-        
