@@ -269,7 +269,7 @@ process.on('SIGTERM', () => {
 // Start the server
 startServer();
 
-export default app;    }
+export default app;    
 });
 
 // Error handling middleware
