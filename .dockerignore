@@ -1,9 +1,10 @@
 node_modules
-npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 .git
 .gitignore
 README.md
-Dockerfile
 .dockerignore
 .env
 .nyc_output
@@ -13,3 +14,7 @@ coverage
 dist
 build
 .cache
+Dockerfile*
+docker-compose*
+.gitlab-ci.yml
+.github
