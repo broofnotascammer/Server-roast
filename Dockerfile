@@ -4,11 +4,11 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first (for better caching)
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --only=production
+# Install dependencies with correct flag
+RUN npm install --omit=dev
 
 # Copy application source
 COPY . .
@@ -24,4 +24,4 @@ ENV PORT=3001
 ENV NODE_ENV=production
 
 # Run the application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
