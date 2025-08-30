@@ -17,8 +17,3 @@ Backend server for the AI Roast Master application using OpenAI's Whisper model 
 - `POST /api/roast/text` - Generate roast from text
 - `POST /api/roast/audio` - Generate roast from audio
 
-## Local Development
-
-1. Install dependencies:
-```bash
-npm install
