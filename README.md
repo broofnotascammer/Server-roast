@@ -3,7 +3,8 @@
 Backend server for the AI Roast Master application using OpenAI's Whisper model for speech recognition.
 
 # Website <i class="fa-solid fa-globe"></i>
-https://broofnotascammer.guthub.io
+https://broofnotascammer.github.io/Server-roast/
+
 
 ## Features
 
