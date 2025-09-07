@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Roast Master 🔥</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        header {
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #ffa86b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .subtitle {
+            color: #c9c9c9;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .input-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffa86b;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
+        }
+        
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ffa86b);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: linear-gradient(45deg, #777, #999);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .roast-output {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            text-align: center;
+            font-weight: 500;
+            min-height: 50px;
+        }
+        
+        .loader {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 5px solid #ff6b6b;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .category-tag {
+            display: inline-block;
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        
+        .server-status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+        
+        .status-connected {
+            color: #4caf50;
+        }
+        
+        .status-disconnected {
+            color: #ff6b6b;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .input-section, .result-section {
+                padding: 15px;
+            }
+            
+            button {
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+            
+            .roast-output {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Roast Master 🔥</h1>
+            <p class="subtitle">Enter a name and get roasted by our AI!<br>Choose a category for personalized roasts.</p>
+        </header>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="nameInput">Name to Roast:</label>
+                <input type="text" id="nameInput" placeholder="Enter a name..." autocomplete="off">
+            </div>
+            
+            <div class="input-group">
+                <label for="categorySelect">Category (optional):</label>
+                <select id="categorySelect">
+                    <option value="">Random Category</option>
+                    <option value="fashion">Fashion</option>
+                    <option value="food">Food</option>
+                    <option value="tech">Tech</option>
+                    <option value="talent">Talent</option>
+                    <option value="default">General</option>
+                </select>
+            </div>
+            
+            <button id="roastButton" onclick="getRoast()">Generate Roast</button>
+        </div>
+        
+        <div class="result-section">
+            <div class="loader" id="loader"></div>
+            <div class="roast-output" id="roastOutput">Your roast will appear here... 🔥</div>
+        </div>
+        
+        <div class="server-status" id="serverStatus">
+            Server: <span class="status-connected">https://backendro.onrender.com</span>
+        </div>
+    </div>
+
+    <script>
+        // Hardcoded server URL
+        const API_BASE_URL = 'https://backendro.onrender.com';
+        
+        // Main roast function
+        async function getRoast() {
+            const name = document.getElementById('nameInput').value.trim();
+            const category = document.getElementById('categorySelect').value;
+            
+            if (!name) {
+                showResult('Please enter a name to roast!', 'error');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/get-roast`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, category })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                showResult(data.roast, 'success', data.category);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                // Fallback to client-side roasting
+                const fallbackRoast = generateFallbackRoast(name, category);
+                showResult(fallbackRoast.roast, 'success', fallbackRoast.category);
+            }
+        }
+        
+        // Fallback roast generation
+        function generateFallbackRoast(name, category) {
+            const roastTemplates = {
+                fashion: [
+                    `${name}'s fashion sense is so bad, even a scarecrow would give them fashion advice.`,
+                    `If ugly were a crime, ${name}'s outfit would be a life sentence without parole.`,
+                    `${name}'s style is what happens when a blindfolded person dresses in the dark during a power outage.`
+                ],
+                food: [
+                    `${name}'s food choices are so wrong, even the garbage can would reject them.`,
+                    `${name}'s taste in food is what happens when someone lets a toddler plan the menu.`,
+                    `The dishes ${name} likes are so bad, they make cafeteria food look like a Michelin-star meal.`
+                ],
+                tech: [
+                    `${name}'s tech skills are so outdated, they make dial-up internet look cutting edge.`,
+                    `If incompetence were code, ${name} would be the entire Stack Overflow of failure.`,
+                    `${name}'s coding is so bad, even a broken keyboard would produce better output.`
+                ],
+                talent: [
+                    `${name}'s talent is so limited, it makes a rock look multi-talented.`,
+                    `If failure were an Olympic sport, ${name} would be the gold medalist.`,
+                    `${name}'s skills are so poor, even a participation trophy would feel insulted.`
+                ],
+                default: [
+                    `${name} is so disappointing, even my AI feelings got hurt analyzing them.`,
+                    `${name} makes me wish I was a simple calculator instead of dealing with this.`,
+                    `${name} is the reason why aliens won't talk to us.`
+                ]
+            };
+            
+            // Use selected category or pick random
+            const selectedCategory = category || ['fashion', 'food', 'tech', 'talent', 'default'][Math.floor(Math.random() * 5)];
+            const roasts = roastTemplates[selectedCategory];
+            const randomRoast = roasts[Math.floor(Math.random() * roasts.length)];
+            
+            return {
+                roast: randomRoast,
+                category: selectedCategory
+            };
+        }
+        
+        // UI functions
+        function showLoading() {
+            document.getElementById('roastOutput').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('roastButton').disabled = true;
+        }
+        
+        function showResult(message, type, category = null) {
+            document.getElementById('loader').style.display = 'none';
+            const outputElement = document.getElementById('roastOutput');
+            outputElement.style.display = 'block';
+            
+            if (category) {
+                outputElement.innerHTML = `${message} <span class="category-tag">${category}</span>`;
+            } else {
+                outputElement.textContent = message;
+            }
+            
+            document.getElementById('roastButton').disabled = false;
+        }
+        
+        // Allow pressing Enter to generate roast
+        document.getElementById('nameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                getRoast();
+            }
+        });
+        
+        // Example names for inspiration
+        const examples = ["Alex", "Jordan", "Taylor", "Casey", "Morgan"];
+        let exampleIndex = 0;
+        
+        setInterval(() => {
+            document.getElementById('nameInput').placeholder = `e.g., ${examples[exampleIndex]}...`;
+            exampleIndex = (exampleIndex + 1) % examples.length;
+        }, 2000);
+    </script>
+</body>
+</html>
