@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Roast Master 🔥</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        header {
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #ffa86b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .subtitle {
+            color: #c9c9c9;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .search-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            width: 100%;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
+        }
+        
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .search-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ffa86b);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            white-space: nowrap;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .search-btn:active {
+            transform: translateY(0);
+        }
+        
+        .search-btn:disabled {
+            background: linear-gradient(45deg, #777, #999);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .examples {
+            font-size: 0.9rem;
+            color: #c9c9c9;
+            margin-top: 10px;
+        }
+        
+        .result-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            width: 100%;
+        }
+        
+        .roast-output {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            text-align: center;
+            font-weight: 500;
+            min-height: 50px;
+        }
+        
+        .loader {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 5px solid #ff6b6b;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .category-tag {
+            display: inline-block;
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        
+        .server-status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+        
+        .status-connected {
+            color: #4caf50;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .search-section, .result-section {
+                padding: 15px;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-btn {
+                width: 100%;
+            }
+            
+            .roast-output {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Roast Master 🔥</h1>
+            <p class="subtitle">Enter anything and get roasted by our AI!<br>The AI will search its library for the perfect roast.</p>
+        </header>
+        
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Enter anything to roast..." autocomplete="off">
+                <button id="searchBtn" class="search-btn" onclick="searchRoast()">Roast It! 🔥</button>
+            </div>
+            <div class="examples">
+                Try: "pineapple pizza", "JavaScript", "your coding skills", "TikTok dances"
+            </div>
+        </div>
+        
+        <div class="result-section">
+            <div class="loader" id="loader"></div>
+            <div class="roast-output" id="roastOutput">Enter something above to get roasted! 🔥</div>
+        </div>
+        
+        <div class="server-status">
+            Powered by: <span class="status-connected">https://backendro.vercel.app</span>
+        </div>
+    </div>
+
+    <script>
+        // Hardcoded server URL
+        const API_BASE_URL = 'https://backendro.vercel.app';
+        
+        // Main search function
+        async function searchRoast() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (!query) {
+                showResult('Please enter something to roast!', 'error');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                // Try different API endpoints based on the query
+                let endpoint = '/get-roast';
+                let body = { query: query };
+                
+                // You can customize this based on your API structure
+                // For example, if you have different endpoints for different types of queries
+                if (query.toLowerCase().includes('code') || query.toLowerCase().includes('program')) {
+                    endpoint = '/roast/code';
+                } else if (query.toLowerCase().includes('food') || query.toLowerCase().includes('eat')) {
+                    endpoint = '/roast/food';
+                }
+                
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Handle different response formats
+                if (data.roast) {
+                    showResult(data.roast, 'success', data.category || 'general');
+                } else if (data.message) {
+                    showResult(data.message, 'success', data.type || 'general');
+                } else {
+                    // Fallback if response format is unexpected
+                    showResult("🔥 " + JSON.stringify(data), 'success', 'ai roast');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                // Fallback to client-side roasting
+                const fallbackRoast = generateFallbackRoast(query);
+                showResult(fallbackRoast.roast, 'success', fallbackRoast.category);
+            }
+        }
+        
+        // Fallback roast generation
+        function generateFallbackRoast(query) {
+            const roastTemplates = {
+                tech: [
+                    `"${query}" is so outdated, it makes dial-up internet look cutting edge.`,
+                    `If incompetence were code, "${query}" would be the entire Stack Overflow of failure.`,
+                    `"${query}" is so bad, even a broken keyboard would produce better output.`
+                ],
+                food: [
+                    `"${query}" is so wrong, even the garbage can would reject it.`,
+                    `"${query}" is what happens when someone lets a toddler plan the menu.`,
+                    `"${query}" is so bad, it makes cafeteria food look like a Michelin-star meal.`
+                ],
+                fashion: [
+                    `"${query}" is so bad, even a scarecrow would give fashion advice.`,
+                    `If ugly were a crime, "${query}" would be a life sentence without parole.`,
+                    `"${query}" is what happens when a blindfolded person dresses in the dark.`
+                ],
+                general: [
+                    `"${query}" is so disappointing, even my AI feelings got hurt analyzing it.`,
+                    `"${query}" makes me wish I was a simple calculator instead of dealing with this.`,
+                    `"${query}" is the reason why aliens won't talk to us.`
+                ]
+            };
+            
+            // Determine category based on query content
+            let category = 'general';
+            const lowerQuery = query.toLowerCase();
+            
+            if (lowerQuery.includes('code') || lowerQuery.includes('tech') || 
+                lowerQuery.includes('program') || lowerQuery.includes('computer')) {
+                category = 'tech';
+            } else if (lowerQuery.includes('food') || lowerQuery.includes('eat') || 
+                      lowerQuery.includes('pizza') || lowerQuery.includes('dish')) {
+                category = 'food';
+            } else if (lowerQuery.includes('fashion') || lowerQuery.includes('cloth') || 
+                      lowerQuery.includes('dress') || lowerQuery.includes('style')) {
+                category = 'fashion';
+            }
+            
+            const roasts = roastTemplates[category];
+            const randomRoast = roasts[Math.floor(Math.random() * roasts.length)];
+            
+            return {
+                roast: randomRoast,
+                category: category
+            };
+        }
+        
+        // UI functions
+        function showLoading() {
+            document.getElementById('roastOutput').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('searchBtn').disabled = true;
+        }
+        
+        function showResult(message, type, category = null) {
+            document.getElementById('loader').style.display = 'none';
+            const outputElement = document.getElementById('roastOutput');
+            outputElement.style.display = 'block';
+            
+            if (category && category !== 'general') {
+                outputElement.innerHTML = `${message} <span class="category-tag">${category}</span>`;
+            } else {
+                outputElement.textContent = message;
+            }
+            
+            document.getElementById('searchBtn').disabled = false;
+        }
+        
+        // Allow pressing Enter to search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchRoast();
+            }
+        });
+        
+        // Example queries for inspiration
+        const examples = [
+            "pineapple pizza", "JavaScript", "your coding skills", 
+            "TikTok dances", "homework", "Monday mornings"
+        ];
+        let exampleIndex = 0;
+        
+        setInterval(() => {
+            document.getElementById('searchInput').placeholder = `e.g., "${examples[exampleIndex]}"...`;
+            exampleIndex = (exampleIndex + 1) % examples.length;
+        }, 2000);
+    </script>
+</body>
+</html>
